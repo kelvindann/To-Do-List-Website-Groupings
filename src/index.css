@@ -1,0 +1,63 @@
+
+@import "tailwindcss";
+
+@theme {
+  --color-indigo-50: #EEF2FF;
+  --color-blue-600: #2563EB;
+  --color-blue-100: #DBEAFE;
+  --color-green-100: #DCFCE7;
+  --color-green-700: #15803D;
+  --color-amber-100: #FEF3C7;
+  --color-amber-800: #92400E;
+  --color-red-100: #FEE2E2;
+  --color-red-700: #B91C1C;
+  --color-border: #CBD5E8;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    min-width: 320px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--color-indigo-50);
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue-600);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border border-border bg-white p-5 shadow-sm transition-shadow duration-150 hover:shadow-md motion-reduce:transition-none;
+  }
+
+  .page-title {
+    @apply mb-6 border-l-4 border-purple-500 pl-3 text-2xl font-semibold text-slate-800 sm:text-3xl;
+  }
+
+  .section-title {
+    @apply mb-4 text-base font-semibold text-blue-800;
+  }
+
+  .text-input {
+    @apply rounded-md border border-border bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center rounded-md border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-blue-200 disabled:bg-blue-100 disabled:text-blue-700 motion-reduce:transition-none;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-blue-200 bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800 transition-colors duration-150 hover:border-blue-300 hover:bg-blue-200 disabled:cursor-not-allowed disabled:border-blue-100 disabled:bg-blue-50 disabled:text-blue-700 motion-reduce:transition-none;
+  }
+
+  .button-danger {
+    @apply inline-flex items-center justify-center rounded-md border border-red-200 bg-red-100 px-4 py-2 text-sm font-medium text-red-700 transition-colors duration-150 hover:border-red-300 hover:bg-red-200 hover:text-red-800 disabled:cursor-not-allowed disabled:border-red-100 disabled:bg-red-50 disabled:text-red-700 motion-reduce:transition-none;
+  }
+}
