@@ -131,3 +131,12 @@ test('invalid saved data falls back safely and orphan tasks are discarded', () =
   assert.equal(loadData().tasks.length, 3)
   assert.equal(loadData().groups.length, 4)
 })
+
+test('fresh workspaces keep independent default groups', () => {
+  const first = loadData()
+  first.groups[0].name = 'Temporary name'
+  first.groups.push({ id: 'temporary', name: 'Temporary group' })
+  const second = loadData()
+  assert.equal(second.groups.length, 4)
+  assert.equal(second.groups[0].name, 'School Activities')
+})

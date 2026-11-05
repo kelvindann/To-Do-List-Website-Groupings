@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react'
+import Icon from './Icon.jsx'
+import useTodoStore from '../hooks/useTodoStore.js'
 
-function TaskForm({ addTask, groupId = null }) {
+function TaskForm({ groupId = null }) {
+  const addTask = useTodoStore(state => state.addTask)
   const [title, setTitle] = useState('')
   const [error, setError] = useState('')
   const submitted = useRef(false)
@@ -15,8 +18,12 @@ function TaskForm({ addTask, groupId = null }) {
       return
     }
 
+    if (!addTask(title, groupId)) {
+      setError('This group is no longer available. Choose another group to add your task.')
+      inputRef.current.focus()
+      return
+    }
     submitted.current = true
-    addTask(title, groupId)
     setTitle('')
     setError('')
     inputRef.current.focus()
@@ -42,12 +49,12 @@ function TaskForm({ addTask, groupId = null }) {
           aria-describedby={error ? 'task-error' : 'task-hint'}
           className="text-input min-w-0 flex-1"
         />
-        <button type="submit" disabled={!title.trim()} className="button-primary">Add Task</button>
+        <button type="submit" disabled={!title.trim()} className="button-primary"><Icon name="plus" size={18} />Add Task</button>
       </div>
       {error ? (
         <p id="task-error" role="alert" className="mt-2 text-sm text-red-700">{error}</p>
       ) : (
-        <p id="task-hint" className="mt-2 text-xs text-slate-500">Press Enter to add your task.</p>
+        <p id="task-hint" className="mt-3 text-xs text-slate-500">Press <kbd className="mx-0.5 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[11px]">Enter</kbd> to add your task.</p>
       )}
     </form>
   )

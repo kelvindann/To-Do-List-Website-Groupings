@@ -1,93 +1,71 @@
-import { useEffect, useState } from 'react'
-import { Link, NavLink, Route, Routes } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
+import MyTask from './pages/MyTask.jsx'
 import Groups from './pages/Groups.jsx'
 import GroupTasks from './pages/GroupTasks.jsx'
 import Guide from './pages/Guide.jsx'
 import Developers from './pages/Developers.jsx'
-import {
-  clearGroupTasks,
-  createTask,
-  deleteGroup,
-  deleteTask,
-  insertGroup,
-  insertTask,
-  loadData,
-  storageKey,
-  toggleTask,
-} from './data.js'
+import Users from './pages/Users.jsx'
+import Icon from './components/Icon.jsx'
+import InteractiveBackground from './components/InteractiveBackground.jsx'
+import useTodoStore from './hooks/useTodoStore.js'
 
 function App() {
-  const [data, setData] = useState(loadData)
+  const storageError = useTodoStore(state => state.storageError)
+  const { pathname } = useLocation()
+  const previousPath = useRef(pathname)
+  const mainRef = useRef(null)
 
   useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(data))
-    } catch (error) {
-      console.error('Tasks and groups could not be saved in localStorage.', error)
-    }
-  }, [data])
+    if (previousPath.current === pathname) return
+    previousPath.current = pathname
+    mainRef.current?.focus({ preventScroll: true })
+    window.scrollTo(0, 0)
+  }, [pathname])
 
-  function addTask(title, groupId = null) {
-    const task = createTask(title, groupId)
-    if (task) setData(current => insertTask(current, task))
-  }
-
-  function addGroup(name) {
-    const cleanedName = name.trim().replace(/\s+/g, ' ')
-    if (!cleanedName) return 'Enter a group name.'
-    if (data.groups.some(group => group.name.toLowerCase() === cleanedName.toLowerCase())) {
-      return 'A group with this name already exists.'
-    }
-
-    const group = { id: crypto.randomUUID(), name: cleanedName }
-    setData(current => insertGroup(current, group))
-    return ''
-  }
-
-  const taskActions = {
-    addTask,
-    toggleTask: taskId => setData(current => toggleTask(current, taskId)),
-    deleteTask: taskId => setData(current => deleteTask(current, taskId)),
-  }
   const navigation = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/groups', label: 'Task Groups' },
-    { to: '/guide', label: 'User Guide' },
-    { to: '/developers', label: 'Developers' },
+    { to: '/', label: 'Dashboard', icon: 'grid' },
+    { to: '/my-task', label: 'My Task', icon: 'list' },
+    { to: '/groups', label: 'Task Groups', icon: 'folder' },
+    { to: '/guide', label: 'User Guide', icon: 'help' },
+    { to: '/users', label: 'User Information', icon: 'users' },
+    { to: '/developers', label: 'Developers', icon: 'code' },
   ]
 
   return (
-    <div className="min-h-screen bg-indigo-50 text-slate-800">
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
-        <header className="mb-7 rounded-lg border border-blue-200 border-t-4 border-t-blue-600 bg-blue-50 p-2 shadow-sm">
-          <nav aria-label="Main navigation" className="grid grid-cols-2 gap-1 sm:flex sm:gap-2">
+    <div className="app-shell">
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-7 sm:py-9">
+        <header className="navigation-panel">
+          <nav aria-label="Main navigation" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex">
             {navigation.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
                 className={({ isActive }) =>
-                  `rounded-md px-3 py-2.5 text-center text-sm font-medium transition-colors duration-150 motion-reduce:transition-none ${
-                    isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-purple-700 hover:bg-purple-100 hover:text-purple-900'
-                  }`
+                  `navigation-link ${isActive ? 'navigation-link-active' : ''}`
                 }
               >
-                {item.label}
+                <Icon name={item.icon} size={18} />{item.label}
               </NavLink>
             ))}
           </nav>
         </header>
 
-        <main id="main-content">
+        <main ref={mainRef} id="main-content" tabIndex={-1} className="outline-none">
+          {storageError && <p role="alert" className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{storageError}</p>}
           <Routes>
-            <Route path="/" element={<Dashboard tasks={data.tasks} {...taskActions} />} />
-            <Route path="/groups" element={<Groups groups={data.groups} tasks={data.tasks} addGroup={addGroup} deleteGroup={groupId => setData(current => deleteGroup(current, groupId))} />} />
-            <Route path="/groups/:groupId" element={<GroupTasks groups={data.groups} tasks={data.tasks} clearGroupTasks={groupId => setData(current => clearGroupTasks(current, groupId))} {...taskActions} />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/my-task" element={<MyTask />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:groupId" element={<GroupTasks />} />
             <Route path="/guide" element={<Guide />} />
+            <Route path="/users" element={<Users />} />
             <Route path="/developers" element={<Developers />} />
             <Route path="*" element={
-              <section className="card">
+              <section className="card space-y-4">
                 <h1 className="page-title">Page not found</h1>
                 <Link to="/" className="text-sm font-medium text-blue-700 hover:underline">Return to the dashboard</Link>
               </section>
@@ -95,6 +73,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <InteractiveBackground />
     </div>
   )
 }

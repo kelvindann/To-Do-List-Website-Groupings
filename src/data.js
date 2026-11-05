@@ -55,9 +55,9 @@ export function clearGroupTasks(data, groupId) {
   return { ...data, tasks: data.tasks.filter(task => task.groupId !== groupId) }
 }
 
-export function loadData() {
+export function loadData(storage) {
   try {
-    const saved = JSON.parse(localStorage.getItem(storageKey))
+    const saved = JSON.parse((storage === undefined ? globalThis.localStorage : storage)?.getItem(storageKey) ?? null)
     if (saved && Array.isArray(saved.groups) && Array.isArray(saved.tasks)) {
       const groups = saved.groups.filter(group =>
         group && typeof group.id === 'string' && typeof group.name === 'string' && group.name.trim(),
@@ -70,8 +70,8 @@ export function loadData() {
       return { groups, tasks }
     }
   } catch {
-    return { groups: defaultGroups, tasks: [] }
+    return { groups: defaultGroups.map(group => ({ ...group })), tasks: [] }
   }
 
-  return { groups: defaultGroups, tasks: [] }
+  return { groups: defaultGroups.map(group => ({ ...group })), tasks: [] }
 }
